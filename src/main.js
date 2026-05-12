@@ -400,33 +400,53 @@ const agentGroups = {
   'Trader': { icon: '💹', desc: '1位交易员执行交易指令', agents: agents.filter(a => a.group === 'Trader') },
 };
 
+// Dark mode init
+(function initDark() {
+  const stored = localStorage.getItem('darkMode');
+  if (stored === 'true' || (stored === null && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+    document.documentElement.classList.add('dark');
+  }
+})();
+
 function render() {
+  const isDark = document.documentElement.classList.contains('dark');
   const params = new URLSearchParams(window.location.search);
-  const docFile = params.get('doc');
+  const docFile = params.get('file');
   const app = document.getElementById('app');
-  
-  const nav = Object.entries(docs).map(([file, d]) => 
-    `<a href="?doc=${file}" class="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-gray-200 transition ${docFile === file ? 'bg-blue-100 text-blue-700 font-medium' : 'text-gray-700'}">${d.icon} ${d.name}</a>`
+
+  const navItems = Object.entries(docs).map(([file, d]) =>
+    `<a href="?file=${file}" class="nav-link flex items-center gap-2 px-4 py-2 rounded-lg transition ${docFile === file ? 'active' : ''}">${d.icon} ${d.name}</a>`
   ).join('');
-  
+
+  const darkIcon = isDark
+    ? '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>'
+    : '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+
   if (docFile && docs[docFile]) {
     const doc = docs[docFile];
     app.innerHTML = `
       <div class="min-h-screen flex">
-        <aside class="w-64 bg-white border-r border-gray-200 flex-shrink-0 overflow-y-auto fixed h-full">
-          <div class="p-4 border-b border-gray-200">
-            <h1 class="text-lg font-bold text-gray-900">🤖 TradingAgents</h1>
-            <p class="text-sm text-gray-500 mt-1">设计规范</p>
+        <aside class="aside w-64 border-r flex-shrink-0 overflow-y-auto fixed h-full">
+          <div class="p-4 border-b" style="border-color:var(--border-color)">
+            <div class="flex items-center justify-between">
+              <div>
+                <h1 class="text-lg font-bold">🤖 TradingAgents</h1>
+                <p class="text-sm text-muted mt-1">设计规范</p>
+              </div>
+              <button id="themeToggle" class="p-2 rounded-lg hover:bg-gray-200 transition" style="color:var(--text-secondary)" title="切换暗色模式">
+                ${darkIcon}
+              </button>
+            </div>
           </div>
           <nav class="p-3 space-y-1">
-            <a href="?" class="flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-gray-200 transition text-gray-700">🏠 首页</a>
-            ${nav}
+            <a href="?" class="nav-link flex items-center gap-2 px-4 py-2 rounded-lg transition ${!docFile ? 'active' : ''}">🏠 首页</a>
+            ${navItems}
           </nav>
         </aside>
         <main class="flex-1 overflow-y-auto ml-64">
           <div class="max-w-4xl mx-auto p-8">
-            <button onclick="history.back()" class="mb-4 text-sm text-blue-600 hover:text-blue-800">← 返回</button>
-            <article class="prose prose-slate max-w-none">
+            <button onclick="history.back()" class="mb-4 text-sm" style="color:var(--accent-text)">← 返回</button>
+            <article class="prose prose-slate max-w-none" style="color:var(--text-primary)">
               ${marked.parse(doc.content)}
             </article>
           </div>
@@ -437,25 +457,32 @@ function render() {
     // 首页
     app.innerHTML = `
       <div class="min-h-screen flex">
-        <aside class="w-64 bg-white border-r border-gray-200 flex-shrink-0 overflow-y-auto fixed h-full">
-          <div class="p-4 border-b border-gray-200">
-            <h1 class="text-lg font-bold text-gray-900">🤖 TradingAgents</h1>
-            <p class="text-sm text-gray-500 mt-1">设计规范</p>
+        <aside class="aside w-64 border-r flex-shrink-0 overflow-y-auto fixed h-full">
+          <div class="p-4 border-b" style="border-color:var(--border-color)">
+            <div class="flex items-center justify-between">
+              <div>
+                <h1 class="text-lg font-bold">🤖 TradingAgents</h1>
+                <p class="text-sm text-muted mt-1">设计规范</p>
+              </div>
+              <button id="themeToggle" class="p-2 rounded-lg hover:bg-gray-200 transition" style="color:var(--text-secondary)" title="切换暗色模式">
+                ${darkIcon}
+              </button>
+            </div>
           </div>
           <nav class="p-3 space-y-1">
-            <span class="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-50 text-blue-700 font-medium">🏠 首页</span>
-            ${nav}
+            <span class="nav-link flex items-center gap-2 px-4 py-2 rounded-lg active">🏠 首页</span>
+            ${navItems}
           </nav>
         </aside>
         <main class="flex-1 overflow-y-auto ml-64">
           <div class="p-8 max-w-5xl mx-auto">
-            <h1 class="text-3xl font-bold text-gray-900 mb-2">🏗️ TradingAgents-CN 设计规范</h1>
-            <p class="text-gray-600 mb-8">多智能体量化交易系统的完整架构设计文档</p>
-            
+            <h1 class="text-3xl font-bold mb-2 text-primary">🏗️ TradingAgents-CN 设计规范</h1>
+            <p class="text-secondary mb-8">多智能体量化交易系统的完整架构设计文档</p>
+
             <!-- 架构图 -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
-              <h2 class="text-xl font-semibold mb-4">⚙️ 系统架构</h2>
-              <pre class="text-xs bg-gray-900 text-green-400 p-4 rounded-lg overflow-x-auto">
+            <div class="card rounded-xl p-6 mb-8">
+              <h2 class="text-xl font-semibold mb-4 text-primary">⚙️ 系统架构</h2>
+              <pre class="arch-pre text-xs p-4 rounded-lg overflow-x-auto">
 ┌─────────────────────────────────────────────────────────────┐
 │                      TradingAgents-CN                        │
 ├─────────────────────────────────────────────────────────────┤
@@ -475,21 +502,21 @@ function render() {
 │  └──────────┘ └──────────┘ └──────────┘ └──────────┘       │
 └─────────────────────────────────────────────────────────────┘</pre>
             </div>
-            
+
             <!-- Agent 列表 -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
-              <h2 class="text-xl font-semibold mb-4">🤖 Agent 系统（13个智能体）</h2>
+            <div class="card rounded-xl p-6 mb-8">
+              <h2 class="text-xl font-semibold mb-4 text-primary">🤖 Agent 系统（13个智能体）</h2>
               <div class="space-y-6">
                 ${Object.entries(agentGroups).map(([group, info]) => `
                   <div>
-                    <h3 class="text-base font-medium text-gray-800 mb-2">${info.icon} ${group} — ${info.desc}</h3>
+                    <h3 class="text-base font-medium mb-2 text-secondary">${info.icon} ${group} — ${info.desc}</h3>
                     <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
                       ${info.agents.map(a => `
-                        <div class="flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-lg text-sm">
+                        <div class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm" style="background:var(--bg-secondary)">
                           <span>${a.icon}</span>
                           <div>
-                            <div class="font-medium text-gray-900">${a.name}</div>
-                            <div class="text-gray-500 text-xs">${a.role}</div>
+                            <div class="font-medium text-primary">${a.name}</div>
+                            <div class="text-muted text-xs">${a.role}</div>
                           </div>
                         </div>
                       `).join('')}
@@ -498,11 +525,11 @@ function render() {
                 `).join('')}
               </div>
             </div>
-            
+
             <!-- 数据流 -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
-              <h2 class="text-xl font-semibold mb-4">📊 数据流</h2>
-              <pre class="text-sm bg-gray-50 p-4 rounded-lg border border-gray-200">
+            <div class="card rounded-xl p-6 mb-8">
+              <h2 class="text-xl font-semibold mb-4 text-primary">📊 数据流</h2>
+              <pre class="text-sm p-4 rounded-lg overflow-x-auto" style="background:var(--bg-secondary);color:var(--text-secondary)">
 User Request
     ↓
 Strategy Manager (调度)
@@ -525,17 +552,17 @@ Trade Execution + Risk Check
     ↓
 Report Generation</pre>
             </div>
-            
+
             <!-- 核心模块 -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <h2 class="text-xl font-semibold mb-4">📚 设计文档</h2>
+            <div class="card rounded-xl p-6">
+              <h2 class="text-xl font-semibold mb-4 text-primary">📚 设计文档</h2>
               <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                 ${Object.entries(docs).filter(([f]) => f !== 'SPEC.md').map(([file, d]) => `
-                  <a href="?doc=${file}" class="flex items-center gap-3 px-4 py-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
+                  <a href="?file=${file}" class="flex items-center gap-3 px-4 py-3 rounded-lg transition hover:opacity-80" style="background:var(--bg-secondary)">
                     <span class="text-2xl">${d.icon}</span>
                     <div>
-                      <div class="font-medium text-gray-900">${d.name}</div>
-                      <div class="text-gray-500 text-xs">${file}</div>
+                      <div class="font-medium text-primary">${d.name}</div>
+                      <div class="text-muted text-xs">${file}</div>
                     </div>
                   </a>
                 `).join('')}
@@ -546,6 +573,13 @@ Report Generation</pre>
       </div>
     `;
   }
+
+  // Attach toggle handler
+  document.getElementById('themeToggle')?.addEventListener('click', () => {
+    const isDark = document.documentElement.classList.toggle('dark');
+    localStorage.setItem('darkMode', isDark);
+    render();
+  });
 }
 
 render();
